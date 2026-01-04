@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"regexp"
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
@@ -24,11 +23,6 @@ func FindLatestVersion(current *semver.Version, tags []string, major, minor, pat
 
 	// Collect valid semantic versions
 	for _, tag := range tags {
-		// Filter out invalid semantic versions
-		if !isValidSemver(tag) {
-			continue
-		}
-
 		// Attempt to parse the tag as a semantic version to compare it later easily
 		v, err := semver.NewVersion(tag)
 		if err != nil {
@@ -71,12 +65,6 @@ func FindLatestVersion(current *semver.Version, tags []string, major, minor, pat
 	}
 
 	return ""
-}
-
-func isValidSemver(tag string) bool {
-	regex := regexp.MustCompile(`^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`)
-	matches := regex.FindStringSubmatch(tag)
-	return len(matches) > 0
 }
 
 func isEqualMajor(current, tag *semver.Version) bool {

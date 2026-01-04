@@ -149,6 +149,39 @@ func TestFindLatestVersion(t *testing.T) {
 				Expected: "10.0.0",
 			},
 		},
+		{
+			name: "minor update with partial semver (minor only)",
+			testData: TestFindLatestVersionStruct{
+				Current:  "1.0",
+				Tags:     []string{"1.0", "1.1", "1.2", "2.0"},
+				Major:    false,
+				Minor:    true,
+				Patch:    false,
+				Expected: "1.2",
+			},
+		},
+		{
+			name: "major update with partial semver (minor only)",
+			testData: TestFindLatestVersionStruct{
+				Current:  "1.0",
+				Tags:     []string{"1.0", "1.1", "1.2", "2.0"},
+				Major:    true,
+				Minor:    false,
+				Patch:    false,
+				Expected: "2.0",
+			},
+		},
+		{
+			name: "mixed partial and valid semver",
+			testData: TestFindLatestVersionStruct{
+				Current:  "1.0.0",
+				Tags:     []string{"1.0", "1.0.0", "1.1", "1.1.0", "1.1.1"},
+				Major:    false,
+				Minor:    true,
+				Patch:    false,
+				Expected: "1.1.1",
+			},
+		},
 	}
 
 	for _, tt := range tests {
