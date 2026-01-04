@@ -30,6 +30,7 @@ func (u *UpdateChecker) Check(major, minor, patch bool) ([]UpdateInfo, error) {
 	}
 
 	for i, updateInfo := range updateInfos {
+		slog.Debug("Checking " + updateInfo.ImageName + " " + updateInfo.CurrentTag)
 		version, err := semver.NewVersion(updateInfo.CurrentTag)
 		if err != nil {
 			slog.Warn(fmt.Sprintf("Skipping (invalid semver) \t Image: %s \t Path: %s", updateInfo.ImageName, updateInfo.FilePath))
@@ -39,6 +40,7 @@ func (u *UpdateChecker) Check(major, minor, patch bool) ([]UpdateInfo, error) {
 		tags, err := u.registry.FetchImageTags(updateInfo.ImageName)
 		if err != nil {
 			slog.Error(fmt.Sprintf("Skipping (failed fetching tags) \t Image: %s \t Path: %s", updateInfo.ImageName, updateInfo.FilePath))
+			slog.Debug("Error: " + err.Error())
 			continue
 		}
 
