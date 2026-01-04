@@ -2,6 +2,7 @@ package internal
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/Masterminds/semver/v3"
 )
@@ -15,6 +16,8 @@ func FindLatestVersion(current *semver.Version, tags []string, major, minor, pat
 		patch = true
 	}
 
+	currentIsStrict := len(strings.SplitN(current.Original(), ".", 3)) == 3
+
 	type VersionTag struct {
 		Version *semver.Version
 		Tag     string
@@ -24,10 +27,18 @@ func FindLatestVersion(current *semver.Version, tags []string, major, minor, pat
 	// Collect valid semantic versions
 	for _, tag := range tags {
 		// Attempt to parse the tag as a semantic version to compare it later easily
-		v, err := semver.NewVersion(tag)
+		var v *semver.Version
+		var err error
+		if currentIsStrict {
+			// Don't regress from a strict version to a non-strict one
+			v, err = semver.StrictNewVersion(tag)
+		} else {
+			v, err = semver.NewVersion(tag)
+		}
 		if err != nil {
 			continue
 		}
+
 		versionTags = append(versionTags, VersionTag{Version: v, Tag: tag})
 	}
 

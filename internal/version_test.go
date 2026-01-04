@@ -182,6 +182,17 @@ func TestFindLatestVersion(t *testing.T) {
 				Expected: "1.1.1",
 			},
 		},
+		{
+			name: "don't update to partial semver (minor only)",
+			testData: TestFindLatestVersionStruct{
+				Current:  "1.0.0",
+				Tags:     []string{"1.0", "1.0.0", "1.0.1", "1.1"},
+				Major:    false,
+				Minor:    true,
+				Patch:    false,
+				Expected: "1.0.1",
+			},
+		},
 	}
 
 	for _, tt := range tests {
