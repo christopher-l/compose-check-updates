@@ -1,9 +1,14 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/regclient/regclient"
+	"github.com/regclient/regclient/types/ref"
 )
 
 type IRegistry interface {
@@ -15,13 +20,33 @@ type Registry struct {
 }
 
 func NewRegistry(url string) *Registry {
-	if url == "" {
-		url = "https://registry.hub.docker.com/v2/repositories/"
-	}
 	return &Registry{url: url}
 }
 
 func (r *Registry) FetchImageTags(image string) ([]string, error) {
+	if r.url == "" {
+		return fetchImageTags(image)
+	} else {
+		return r.fetchImageTags(image)
+	}
+}
+
+func fetchImageTags(image string) ([]string, error) {
+	ctx := context.Background()
+	rc := regclient.New()
+	r, err := ref.New(image)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create ref: %w", err)
+	}
+	defer rc.Close(ctx, r)
+	tagList, err := rc.TagList(ctx, r)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tag list: %w", err)
+	}
+	return tagList.Tags, nil
+}
+
+func (r *Registry) fetchImageTags(image string) ([]string, error) {
 	var tags []string
 	url := r.getImageURL(image)
 
