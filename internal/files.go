@@ -1,6 +1,10 @@
 package internal
 
 import (
+	"errors"
+	"fmt"
+	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
 )
@@ -10,7 +14,12 @@ func GetComposeFilePaths(root string) ([]string, error) {
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return err
+			if errors.Is(err, fs.ErrPermission) {
+				slog.Warn(fmt.Sprintf("Skipping directory '%s' (permission denied)", path))
+				return nil
+			} else {
+				return err
+			}
 		}
 		if info.IsDir() {
 			return nil
